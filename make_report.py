@@ -29,7 +29,7 @@ class make_report :
         total_df = pd.DataFrame()
         markets = pd.read_sql('select * from market where main = 1', engine)
         markets = markets[1:11].reset_index(drop = True)
-          # markets에 makret1부터 market11까지 객체가 담기게 됨
+          # markets에 market 테이블에 있는 마켓 고유넘버와 이름이 담기게 됨
         
         def get_week_no(d):
             target = datetime.datetime.strptime(d, '%Y-%m-%d')
@@ -58,7 +58,14 @@ class make_report :
                 # 여기서 추출, 리포트 추출 시 categoryGroup에 categoryId - categoryItem{marketId} - itemId JOIN
                 res = pd.read_sql(f"SELECT * FROM reportData{market_id} WHERE DATE(`date`) = '{date}' AND SALE_QT != 0 AND itemId IN \
                                     (SELECT itemId FROM categoryItem{market_id} ci WHERE ci.categoryId IN (SELECT categoryId FROM categoryGroupCategory cgc WHERE cgc.categoryGroupId = 11)) ORDER BY `date`", engine)
-
+                                        '''
+                                            reportData{market_id}에서 모든 열을 추출해오는 쿼리
+                                                조건 1. date 값이 start_date, end_date와 동일
+                                                조건 2. SALE_QT 값이 0이 아님
+                                                조건 3. itemId가 다음과 같은 조건을 만족
+                                                    조건 3.1. itemId가 categoryId 테이블에 존재할 것
+                                                    조건 3.2. 해당 categoryId가 categoryGroupCategory테이블에서 categoryGroupId가 11인 categoryId 일 
+                                        '''
                 res['EC_INFO'] = market_name
                 res['Y'] = date_y
                 res['M'] = date_m
