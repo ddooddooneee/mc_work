@@ -134,24 +134,25 @@ def daily_api_run(start_date, end_date, dt_yester = '2023-12-05') :
         # 10개의 상품만 확인
         df = df[:10]
         
-        # 
         df.fillna('',inplace = True)
         for idx in df.index :
-            if idx == 0 : # 카테고리는 최상단 상품 정보를 가져옴(가장 정확할 것이라 판단)
+            if idx == 0 : 
+                # 카테고리는 최상단 검색결과의 상품 정보를 가져옴
                 cat1 = df.loc[idx,'category1']
                 cat2 = df.loc[idx,'category2']
                 cat3 = df.loc[idx,'category3']
                 cat4 = df.loc[idx,'category4']
                 nm = df.loc[idx,'title']
                 nm = nm.replace('<b>','').replace('</b>','').strip()
-            
+
+            # 브랜드와 제조사 정보는 다른 방법으로 차용
             brand = df.loc[idx,'brand']
             maker = df.loc[idx,'maker']
             
-            # 브랜드와 제조사가 동시에 있는 경우, 해당 정보 사용
+            # 1) 브랜드와 제조사가 동시에 있는 경우, 해당 정보 사용
             if (brand != '') & (maker != '') :
                 break
-            else : # 없으면 공백을 제외한 가장 많이 등장한 브랜드, 제조사 사용
+            else : # 2) 동시에 있는 값이 없으 공백을 제외한 가장 많이 등장한 브랜드, 제조사 사용
                 if (maker != '') :
                     if df['maker'].value_counts().index[0] != '' :
                         maker = df['maker'].value_counts().index[0]
@@ -171,7 +172,9 @@ def daily_api_run(start_date, end_date, dt_yester = '2023-12-05') :
     final_df = pd.DataFrame()
     for prod in tqdm(prdt) :
         nm,maker,brand,cat1,cat2,cat3,cat4,id_idx,secret_idx = shopping_api(prod,id_idx,secret_idx)
-        id_nums = prdt_dic[prod] # 쇼핑 API 결과와 itemId 결합
+                                                                    # 네이버 api에 prod값을 검색한 결과값을 할당
+        id_nums = prdt_dic[prod] 
+            # 쇼핑 API 결과와 itemId 결합
         result = pd.DataFrame([[prod,id_nums,maker,brand,cat1,cat2,cat3,cat4,nm]], columns = ['prdt_nm','ITEMID','maker','brand','cat1','cat2','cat3','cat4','api_prdt_nm'])
         final_df = pd.concat([final_df,result]).reset_index(drop = True)
 
