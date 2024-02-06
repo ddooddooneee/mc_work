@@ -144,7 +144,7 @@ def cleanfile(input_file_path,output_file_path):
         df['SET_DE_OPTION'] = df['MD_DE_OPTION'].copy()
 
         def set_prdt(model):
-            model = re.sub(r'[0-9]{1,3}(KG|MM)[+][0-9]{1,3}(KG|MM)', '', model) # 예시: 1KG+2MM', '123KG+456MM', '99+3MM' -> 제거
+            model = re.sub(r'[0-9]{1,3}(KG|MM)[+][0-9]{1,3}(KG|MM)', '', model) # 예시: 1KG+2MM', '123KG+456MM', '99+3MM' -> 상품 규격 표현 제거
             model = re.findall(r'([A-Z0-9]{1,20}\+[A-Z0-9]{1,20}){1,3}', model) # 알파벳 or 숫자로 구성된 문자열과 + 기호의 조합 찾기, '+[A-Z0-9]{1,20}' 패턴 1에서 3번 반복 가능
             return '+'.join(model) if model else ''
 
@@ -353,7 +353,7 @@ def cleanfile(input_file_path,output_file_path):
     df=del_keyword(df)
     df=del_keyword2(df)
 
-    # 상품명 추가 정제 (옵션 + 상픔명)
+    # 상품명 추가 정제 (옵션 + 상픔명) : 상품명은 같은데 세부옵션만 다른 경우 대비하여 정제추가
     option_delete=['(희망일)','단일상품','폐가전수거있음','폐가전수거없음','요청사항에기재','전국지역','동의','동의함','없음']
 
     for wd in option_delete:
@@ -365,6 +365,15 @@ def cleanfile(input_file_path,output_file_path):
     df['NEW_PRDT_NM'] = df.apply(lambda row: row['PRDT_NM_CLEAN'] + ' ' +row['PRDT_OPTION_CLEAN'] if bool(re.search('[가-힣/ ]', row['PRDT_OPTION_CLEAN'])) and not re.search(re.escape(row['PRDT_OPTION_CLEAN']), row['PRDT_NM_CLEAN'])
                                                 else row['PRDT_NM_CLEAN'] if bool(re.search('[a-zA-Z0-9]', row['PRDT_OPTION_CLEAN'])) or re.search(re.escape(row['PRDT_OPTION_CLEAN']), row['PRDT_NM_CLEAN'])
                                                 else row['PRDT_OPTION_CLEAN'], axis=1)
+            ''' 
+            케이스 1. 상품세부옵션에 한글, 슬래시(/), 혹은 공백이 포함되어 있고, 상품명 값에 상품세부옵션의 내용이 포함되어 있지 않은 경우
+                        ⇒ [상품명] + [상품세부옵션]
+            케이스 2. 상품 세부 옵션에 영어와 숫자로만 구성 또는 상품명 값에 상품세부옵션 값이 포함되어 있는 경우
+                        ⇒ [상품명]
+            케이스 3. 그 외의 경우
+                        ⇒ [상품 세부 옵션]
+            '''
+
 
     df['NEW_PRDT_NM'] = df.apply(lambda row: row['PRDT_NM_CLEAN'] if (row['NEW_PRDT_NM'] == '') or (row['NEW_PRDT_NM'] == ' ') else row['NEW_PRDT_NM'], axis=1)
 
