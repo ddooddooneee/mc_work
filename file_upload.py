@@ -9,7 +9,7 @@ def requests_api(date) : # 수집 진행한 날짜를 기입해야 함
     file_path = f'./Report_data/{date}_sales_data.xlsx'
 
     # 업로드할 URL
-    upload_url = 'http://192.168.0.99:7203/batch/upload-file'
+    upload_url = ''
 
     # 업로드 준비
     files = {'file': open(file_path, 'rb')}
