@@ -66,9 +66,8 @@ df['sale_info'] = df['sale_info'].apply(lambda x: emoji_pattern.sub(r'', x))
 urls= 'https://whensday.co.kr/login'
 store_urls = 'https://whensday.co.kr/partner/'
 
-id = 'mcorpor'
-password = 'test1234'
-
+id = ''
+password = ''
 path = 'D:/작업폴더/whensimg/'
 
 
@@ -108,6 +107,7 @@ time.sleep(1)
 
 # 팝업창 제거
 try : 
+    ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,'//*[@id="modal"]/section/div/section[2]/button[1]')))
     driver.find_element(By.XPATH,'//*[@id="modal"]/section/div/section[2]/button[1]').click()
 except :
     pass
@@ -150,6 +150,7 @@ try:
                 ## 해당 부분, 추후 웬즈데이 업데이트 시 수정예정
         name_ele.send_keys(sale_name)
         info_ele.send_keys(sale_info)
+        time.sleep(0.5)
 
 
         # URL 값 입력
@@ -179,8 +180,12 @@ try:
         ## 기간 입력
 
         ## 시작연도 = 현재연도일 경우
+        date_xpath = '//*[@id="event-register"]/section/section/section[2]/div/div/section'
+        next_month_xpath = '//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[2]'
+        before_month_xpath='//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[1]'
+        
         if start_date2.year == current_date.year:
-            driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/section').click()
+            driver.find_element(By.XPATH, date_xpath).click()
             time.sleep(3)
 
             ## <시작기간 입력>
@@ -188,59 +193,59 @@ try:
             # 가능한 경우의 수 세팅
             if start_month > current_date.month: # 시작달이 현재달보다 미래
                 for i in range(0, month_diff) : 
-                    driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[2]').click()
+                    ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,next_month_xpath)))
+                    driver.find_element(By.XPATH,next_month_xpath).click()
   
             elif start_month < current_date.month: # 시작달이 현재달보다 과거
                 for i in range(0, month_diff) : 
-                    driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[1]').click()
-
+                    ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,before_month_xpath)))
+                    driver.find_element(By.XPATH,before_month_xpath).click()
+                    
             else : # 시작달과 현재달이 동일
                 pass
 
-            time.sleep(3)
+            ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,f'//*[@aria-label="{formatted_startdate}"]')))
             driver.find_element(By.XPATH, f'//*[@aria-label="{formatted_startdate}"]').click()
 
             ## <종료기간 입력>
             if end_month > start_month : # 종료달이 시작달보다 미래
                 for i in range(0,months_difference) :    
-                    driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[2]').click()
+                    ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,next_month_xpath)))    
+                    driver.find_element(By.XPATH,next_month_xpath).click()
  
             else: # 종료달이 시작달보다 과거이거나 동일(과거인 경우의 수는 없음)
                 pass
 
-            time.sleep(3)
+            ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,f'//*[@aria-label="{formatted_enddate}"]')))
             driver.find_element(By.XPATH, f'//*[@aria-label="{formatted_enddate}"]').click()
 
-            driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/section').click()
+            driver.find_element(By.XPATH,date_xpath).click()
         
         ## 시작연도 != 현재연도일 경우
         else :
-            driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/section').click()
-            time.sleep(2)  
+            driver.find_element(By.XPATH,date_xpath).click()
 
             # <시작기간 입력>
             ## 달 설정
             month_diff=abs(current_date.month + 12 - start_month)
             for i in range(0, month_diff) : # 시작달은 무조건 현재달보다 과거 시점
-                    driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[1]').click()
-            time.sleep(0.5)
+                    ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,before_month_xpath))) 
+                    driver.find_element(By.XPATH,before_month_xpath).click()
 
             ## 구체적 일자 클릭
+            ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,f'//*[@aria-label="{formatted_startdate}"]')))
             driver.find_element(By.XPATH, f'//*[@aria-label="{formatted_startdate}"]').click()
-            time.sleep(0.5)
 
             # <종료기간 입력>
             for i in range(0,months_difference) :  # 종료달은 시작달보다 무조건 미래
-                driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[2]').click()
+                ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, next_month_xpath)))     
+                driver.find_element(By.XPATH,next_month_xpath).click()
             
             ## 구체적 일자 클릭
-            time.sleep(0.5)
+            ele = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH,f'//*[@aria-label="{formatted_enddate}"]')))
             driver.find_element(By.XPATH, f'//*[@aria-label="{formatted_enddate}"]').click()
-            time.sleep(0.5)
 
-        time.sleep(1.5)
-
-        driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/section').click()
+        driver.implicitly_wait(time_to_wait=2)
 
         # 최종 저장
         driver.find_element(By.XPATH, '//*[@id="event-register"]/header/div/button[2]').click()
@@ -255,7 +260,7 @@ try:
 
         # 홈으로 돌아가기 => 바로 url 링크 이동하는 방식으로 바꿨기 때문에 필요 없음
         # driver.find_element(By.XPATH, '//*[@id="page-layout"]/div[1]/div/h1/a').click()
-        time.sleep(3)
+        time.sleep(1.5)
         
     # 모든 세일정보를 정상적으로 업데이트 완료
     print('업데이트 완료')
