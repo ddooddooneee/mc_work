@@ -137,17 +137,8 @@ try:
 
         # 스토어 페이지로 이동
         if store != old_store : 
-            # store_value = str(store_value)
-            # select_ele = driver.find_element(By.XPATH,'//*[@id="page-layout"]/div[1]/div/div[2]/div[2]/select')
-            #                                             # //*[@id="page-layout"]/div[1]/div/div[2]/div[2]/select 
-            # select = Select(select_ele)
-            # select.select_by_value(store_value)
-            
             driver.get(url=store_url)
             driver.implicitly_wait(time_to_wait=2)
-
-            # 세일 등록 페이지 이동
-            # driver.find_element(By.XPATH,'//*[@id="page-layout"]/div[2]/main/section[1]/section/div[1]/div[1]/p').click()
         else:
             pass
                 # 브랜드가 같을 경우, 페이지 이동 없이 해당 페이지에서 그대로 진행
@@ -193,29 +184,28 @@ try:
             time.sleep(3)
 
             ## <시작기간 입력>
-
             month_diff=abs(start_month - current_date.month)
             # 가능한 경우의 수 세팅
-            if start_month > current_date.month:
+            if start_month > current_date.month: # 시작달이 현재달보다 미래
                 for i in range(0, month_diff) : 
                     driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[2]').click()
   
-            elif start_month < current_date.month:
+            elif start_month < current_date.month: # 시작달이 현재달보다 과거
                 for i in range(0, month_diff) : 
                     driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[1]').click()
 
-            else :
+            else : # 시작달과 현재달이 동일
                 pass
 
             time.sleep(3)
             driver.find_element(By.XPATH, f'//*[@aria-label="{formatted_startdate}"]').click()
 
             ## <종료기간 입력>
-            if end_month > start_month :
+            if end_month > start_month : # 종료달이 시작달보다 미래
                 for i in range(0,months_difference) :    
                     driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[2]').click()
  
-            else:
+            else: # 종료달이 시작달보다 과거이거나 동일(과거인 경우의 수는 없음)
                 pass
 
             time.sleep(3)
@@ -231,7 +221,7 @@ try:
             # <시작기간 입력>
             ## 달 설정
             month_diff=abs(current_date.month + 12 - start_month)
-            for i in range(0, month_diff) : 
+            for i in range(0, month_diff) : # 시작달은 무조건 현재달보다 과거 시점
                     driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[1]').click()
             time.sleep(0.5)
 
@@ -240,7 +230,7 @@ try:
             time.sleep(0.5)
 
             # <종료기간 입력>
-            for i in range(0,months_difference) :    
+            for i in range(0,months_difference) :  # 종료달은 시작달보다 무조건 미래
                 driver.find_element(By.XPATH,'//*[@id="event-register"]/section/section/section[2]/div/div/div/div/div[1]/div/div[1]/div/button[2]').click()
             
             ## 구체적 일자 클릭
@@ -256,15 +246,18 @@ try:
         driver.find_element(By.XPATH, '//*[@id="event-register"]/header/div/button[2]').click()
 
         old_store = store
+            # 다음 등록 정보와 비교 위해, 현재 brand_name 값 남겨놓음
         print(f"{store}저장완료")
 
-        # 업데이트 완료한 열은 삭제 후 파일 업데이트
+        # 업데이트 완료한 열은 삭제 후 파일 업데이트 (중복방지목적)
         df.drop(index, inplace=True)
         df.to_csv('D:/작업폴더/웬즈데이 세일 정보.csv',encoding='utf-8', index=False)
 
-        # 홈으로 돌아가기
+        # 홈으로 돌아가기 => 바로 url 링크 이동하는 방식으로 바꿨기 때문에 필요 없음
         # driver.find_element(By.XPATH, '//*[@id="page-layout"]/div[1]/div/h1/a').click()
         time.sleep(3)
+        
+    # 모든 세일정보를 정상적으로 업데이트 완료
     print('업데이트 완료')
 
 except Exception as e:
